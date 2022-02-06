@@ -18,7 +18,7 @@ frame11 = sg.Frame('ターゲット',
                        ],
                        [
                            sg.Text('名前 :', font="meiryo"),
-                           sg.Input('ミホノブルボン', disabled=False,
+                           sg.Input('ミホノブルボン(バレンタイン)', disabled=False,
                                     key='-NAME-', font="meiryo"),
                        ],
                        [
@@ -193,11 +193,16 @@ while True:
         window['-SSR-'].update('★★★')
         window['-SR-'].update('★★')
         window['-R-'].update('★')
+        window['-TAR_PER-'].update('0.750')
+        window['-NAME-'].update('ミホノブルボン(バレンタイン)')
+        window['-SSR_PER-'].update('3')
+        window['-SR_PER-'].update('18')
+        window['-R_PER-'].update('79')
 
     # frame2 button
     if event == '-ALL_CLEAR-':
         window['-ERROR-'].update('')
-        window['-FRAME2-'].update('')
+        window['-RES_LOG-'].update('')
         window['-GET_TARGET-'].update('')
         window['-COUNT-'].update('0')
         count = 0
