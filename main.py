@@ -76,9 +76,9 @@ frame11 = sg.Frame('ターゲット',
                                      size=(5, 1), font="meiryo"),
                            sg.Button('10連', key='-TEN-',
                                      size=(5, 1), font="meiryo"),
-                           sg.Input('', disabled=False,
-                                    key='-ERROR-', font="meiryo",
-                                    text_color="red")
+                           sg.Text('',
+                                   key='-ERROR-', font="meiryo",
+                                   text_color="red")
                        ],
                        [
                            sg.Button('初期化', key='-DEFAULT-',
@@ -91,24 +91,72 @@ frame21 = sg.Frame('結果',
 
                    [
                        [
-                           #    sg.Button('クリア', key="-CLEAR-",
-                           #              size=(7, 1), font="meiryo"),
-                           sg.Button('ログクリア', key="-ALL_CLEAR-",
+                           sg.Button('ログクリア', key="-LOG_CLEAR-",
                                      size=(10, 1), font="meiryo"),
-                           sg.Text('合計回数 :', font="meiryo"),
-                           sg.Input('0', disabled=True,
+                           sg.Text('合計', font="meiryo"),
+                           sg.Input('0連', disabled=True,
                                     key='-COUNT-', size=(5, 1),
                                     font="meiryo")
                        ],
                        [
-                           sg.Multiline('', key="-RES_LOG-", font="meiryo"),
+                           sg.Input('', disabled=True,
+                                    key='-RES_0-',
+                                    font="meiryo")
+                       ],
+                       [
+                           sg.Input('', disabled=True,
+                                    key='-RES_1-',
+                                    font="meiryo")
+                       ],
+                       [
+                           sg.Input('', disabled=True,
+                                    key='-RES_2-',
+                                    font="meiryo")
+                       ],
+                       [
+                           sg.Input('', disabled=True,
+                                    key='-RES_3-',
+                                    font="meiryo")
+                       ],
+                       [
+                           sg.Input('', disabled=True,
+                                    key='-RES_4-',
+                                    font="meiryo")
+                       ],
+                       [
+                           sg.Input('', disabled=True,
+                                    key='-RES_5-',
+                                    font="meiryo")
+                       ],
+                       [
+                           sg.Input('', disabled=True,
+                                    key='-RES_6-',
+                                    font="meiryo")
+                       ],
+                       [
+                           sg.Input('', disabled=True,
+                                    key='-RES_7-',
+                                    font="meiryo")
+                       ],
+                       [
+                           sg.Input('', disabled=True,
+                                    key='-RES_8-',
+                                    font="meiryo")
+                       ],
+                       [
+                           sg.Input('', disabled=True,
+                                    key='-RES_9-',
+                                    font="meiryo")
+                       ],
+                       [
+                           sg.Text('')
                        ],
                        [
                            sg.Input('', disabled=True,
                                     key='-GET_TARGET-',
                                     font="meiryo")
                        ]
-                   ], size=(500, 700), font="meiryo"
+                   ], size=(400, 700), font="meiryo"
                    )
 
 
@@ -119,9 +167,25 @@ layout = [
     ]
 ]
 
-window = sg.Window('gachasim', layout, resizable=True)
+window = sg.Window('GachaSimulator', layout, resizable=True)
 
 count = 0
+
+
+def gacha_result(res):
+    def value_result(ssr: str, value: str) -> None:
+        window[ssr].update(value)
+
+    for i in range(len(res)):
+        if res[i] == values['-SSR-']:
+            value_result('-RES_' + str(i) + '-', values['-SSR-'])
+        elif res[i] == values['-SR-']:
+            value_result('-RES_' + str(i) + '-', values['-SR-'])
+        elif res[i] == values['-R-']:
+            value_result('-RES_' + str(i) + '-', values['-R-'])
+        else:
+            value_result('-RES_' + str(i) + '-', values['-RARE-'] +
+                         ':' + values['-NAME-'] + 'を入手')
 
 
 def gacha_detail(val):
@@ -131,7 +195,10 @@ def gacha_detail(val):
         target_int = int(float(values['-TAR_PER-']) * 1000)
         ssr_int = int(float(values['-SSR_PER-']) * 1000)
         sr_int = int(float(values['-SR_PER-']) * 1000)
-        if 0 < random_int <= target_int:
+        if ssr_int < target_int:
+            window['-ERROR-'].update('エラー')
+            break
+        elif 0 < random_int <= target_int:
             res.append('【' + values['-SSR-'] + '】')
         else:
             if target_int < random_int <= ssr_int:
@@ -143,13 +210,13 @@ def gacha_detail(val):
                     res.append(values['-SR-'])
                 else:
                     res.append(values['-R-'])
-        window['-RES_LOG-'].update(res)
         if '【' + values['-SSR-'] + '】' in res:
             window['-GET_TARGET-'].update(str(count) +
                                           '連で' + values['-NAME-'] + 'を入手')
         if count == 200:
             window['-GET_TARGET-'].update(str(count) +
                                           '連で' + values['-NAME-'] + 'を確定入手')
+    gacha_result(res)
 
 
 while True:
@@ -178,7 +245,7 @@ while True:
         else:
             count = count + 1
             gacha_detail(1)
-            window['-COUNT-'].update(count)
+            window['-COUNT-'].update(str(count) + '連')
     if event == '-TEN-':
         if (float(values['-SSR_PER-']) + float(values['-SR_PER-']) +
                 float(values['-R_PER-'])) != 100:
@@ -186,7 +253,7 @@ while True:
         else:
             count = count + 10
             gacha_detail(10)
-            window['-COUNT-'].update(count)
+            window['-COUNT-'].update(str(count) + '連')
     # default settings
     if event == '-DEFAULT-':
         window['-RARE-'].update('★★★')
@@ -198,12 +265,22 @@ while True:
         window['-SSR_PER-'].update('3')
         window['-SR_PER-'].update('18')
         window['-R_PER-'].update('79')
+        window['-ERROR-'].update('')
 
     # frame2 button
-    if event == '-ALL_CLEAR-':
+    if event == '-LOG_CLEAR-':
         window['-ERROR-'].update('')
-        window['-RES_LOG-'].update('')
         window['-GET_TARGET-'].update('')
+        window['-RES_0-'].update('')
+        window['-RES_1-'].update('')
+        window['-RES_2-'].update('')
+        window['-RES_3-'].update('')
+        window['-RES_4-'].update('')
+        window['-RES_5-'].update('')
+        window['-RES_6-'].update('')
+        window['-RES_7-'].update('')
+        window['-RES_8-'].update('')
+        window['-RES_9-'].update('')
         window['-COUNT-'].update('0')
         count = 0
 
