@@ -1,7 +1,10 @@
 from random import random
 import PySimpleGUI as sg
 
-# sg.theme('TealMono')
+sg.theme('LightGreen')
+
+menu_def = [['ファイル', ['ロード', 'セーブ', '---', '終了']],
+            ['ヘルプ', 'About...']]
 # target
 frame11 = sg.Frame('ターゲット',
                    [
@@ -9,7 +12,7 @@ frame11 = sg.Frame('ターゲット',
                            sg.Text('レアリティ:', font="meiryo"),
                            sg.Combo(['SSR', '★★★'], '★★★', readonly=True,
                                     key='-RARE-', size=(5, 1), font="meiryo"),
-                           sg.Button('変更', key='-R_STAR-', size=(5, 1),
+                           sg.Button('切替', key='-R_STAR-', size=(5, 1),
                                      font="meiryo"),
                            sg.Text('確率(%) :', font="meiryo"),
                            sg.Input('0.750', disabled=False,
@@ -18,10 +21,17 @@ frame11 = sg.Frame('ターゲット',
                        ],
                        [
                            sg.Text('名前 :', font="meiryo"),
-                           sg.Input('ミホノブルボン(バレンタイン)', disabled=False,
+                           sg.Input('メジロアルダン', disabled=False,
                                     key='-NAME-', font="meiryo"),
                        ],
                        [
+                           sg.Button('セーブ', key="-SAVE-", size=(5, 1),
+                                     font="meiryo", pad=((260, 0), (0, 0))),
+                           sg.Button('ロード', key="-LOAD-", size=(5, 1),
+                                     font="meiryo", pad=((10, 0), (0, 0))),
+                       ],
+                       [
+                           # blank
                            sg.Text('')
                        ],
                        [
@@ -162,12 +172,13 @@ frame21 = sg.Frame('結果',
 
 layout = [
     [
+        [sg.Menu(menu_def,)],
         frame11,
         frame21
     ]
 ]
 
-window = sg.Window('GachaSimulator', layout, resizable=True)
+window = sg.Window('GachaSimulator -ver 0.3.0-', layout, resizable=True)
 
 count = 0
 
@@ -222,9 +233,21 @@ def gacha_detail(val):
 while True:
     event, values = window.read()
 
-    if event is None:
+    # menu
+    if event is None or event == '終了':
         print('exit')
         break
+
+    if event == 'About...':
+        sg.popup('このアプリについて', 'GachaSimulator', 'ver 0.3.0',  font="meiryo")
+
+    if event == '-SAVE-' or event == 'セーブ':
+        print("save")
+
+    if event == '-LOAD-' or event == 'ロード':
+        print("load")
+
+    # frame1 button
     if event == '-R_STAR-':
         if values['-RARE-'] == 'SSR':
             window['-SSR-'].update('SSR')
@@ -237,19 +260,18 @@ while True:
         else:
             print('Error')
 
-    # frame1 button
     if event == '-ONE-':
         if (float(values['-SSR_PER-']) + float(values['-SR_PER-']) +
-                float(values['-R_PER-'])) != 100:
-            window['-ERROR-'].update('エラー:合計100%にしてください')
+                float(values['-R_PER-'])) > 100:
+            window['-ERROR-'].update('エラー:合計100%以下にしてください')
         else:
             count = count + 1
             gacha_detail(1)
             window['-COUNT-'].update(str(count) + '連')
     if event == '-TEN-':
         if (float(values['-SSR_PER-']) + float(values['-SR_PER-']) +
-                float(values['-R_PER-'])) != 100:
-            window['-ERROR-'].update('エラー:合計100%にしてください')
+                float(values['-R_PER-'])) > 100:
+            window['-ERROR-'].update('エラー:合計100%以下にしてください')
         else:
             count = count + 10
             gacha_detail(10)
@@ -261,7 +283,7 @@ while True:
         window['-SR-'].update('★★')
         window['-R-'].update('★')
         window['-TAR_PER-'].update('0.750')
-        window['-NAME-'].update('ミホノブルボン(バレンタイン)')
+        window['-NAME-'].update('メジロアルダン')
         window['-SSR_PER-'].update('3')
         window['-SR_PER-'].update('18')
         window['-R_PER-'].update('79')
