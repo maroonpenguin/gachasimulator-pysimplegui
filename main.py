@@ -1,5 +1,7 @@
 from random import random
 import PySimpleGUI as sg
+import sqlite3
+
 
 sg.theme('LightGreen')
 
@@ -21,7 +23,7 @@ frame11 = sg.Frame('ターゲット',
                        ],
                        [
                            sg.Text('名前 :', font="meiryo"),
-                           sg.Input('メジロアルダン', disabled=False,
+                           sg.Input('アドマイヤベガ', disabled=False,
                                     key='-NAME-', font="meiryo"),
                        ],
                        [
@@ -87,7 +89,7 @@ frame11 = sg.Frame('ターゲット',
                            sg.Button('10連', key='-TEN-',
                                      size=(5, 1), font="meiryo"),
                            sg.Text('',
-                                   key='-ERROR-', font="meiryo",
+                                   key='-INFO-', font="meiryo",
                                    text_color="red")
                        ],
                        [
@@ -178,9 +180,36 @@ layout = [
     ]
 ]
 
-window = sg.Window('GachaSimulator -ver 0.3.0-', layout, resizable=True)
+window = sg.Window('GachaSimulator', layout, resizable=True)
 
 count = 0
+
+# db
+
+
+def data_save():
+    con = sqlite3.connect('names.db')
+    cur = con.cursor()
+    cur.execute('DROP TABLE IF EXISTS names')  #
+    cur.execute('''CREATE TABLE IF NOT EXISTS names\
+        (name TEXT, tar_per TEXT, rare TEXT )''')
+    val = [values['-NAME-'], values['-TAR_PER-'], values['-RARE-']]
+    cur.execute("INSERT INTO names VALUES(?, ?, ?)", val)
+    con.commit()
+    window['-INFO-'].update(values['-NAME-'] + 'をセーブしました')
+    con.close()
+
+
+def data_load():
+    con = sqlite3.connect('names.db')
+    cur = con.cursor()
+    for row in cur.execute('SELECT * FROM names'):
+        print(row)
+    window['-NAME-'].update(row[0])
+    window['-TAR_PER-'].update(row[1])
+    window['-RARE-'].update(row[2])
+    window['-INFO-'].update(row[0] + 'をロードしました')
+    con.close()
 
 
 def gacha_result(res):
@@ -207,7 +236,7 @@ def gacha_detail(val):
         ssr_int = int(float(values['-SSR_PER-']) * 1000)
         sr_int = int(float(values['-SR_PER-']) * 1000)
         if ssr_int < target_int:
-            window['-ERROR-'].update('エラー')
+            window['-INFO-'].update('エラー')
             break
         elif 0 < random_int <= target_int:
             res.append('【' + values['-SSR-'] + '】')
@@ -239,15 +268,16 @@ while True:
         break
 
     if event == 'About...':
-        sg.popup('このアプリについて', 'GachaSimulator', 'ver 0.3.0',  font="meiryo")
+        sg.popup('このアプリについて', 'GachaSimulator', 'ver 0.4.0',  font="meiryo")
 
     if event == '-SAVE-' or event == 'セーブ':
-        print("save")
+        data_save()
 
     if event == '-LOAD-' or event == 'ロード':
-        print("load")
+        data_load()
 
     # frame1 button
+
     if event == '-R_STAR-':
         if values['-RARE-'] == 'SSR':
             window['-SSR-'].update('SSR')
@@ -263,7 +293,7 @@ while True:
     if event == '-ONE-':
         if (float(values['-SSR_PER-']) + float(values['-SR_PER-']) +
                 float(values['-R_PER-'])) > 100:
-            window['-ERROR-'].update('エラー:合計100%以下にしてください')
+            window['-INFO-'].update('エラー:合計100%以下にしてください')
         else:
             count = count + 1
             gacha_detail(1)
@@ -271,7 +301,7 @@ while True:
     if event == '-TEN-':
         if (float(values['-SSR_PER-']) + float(values['-SR_PER-']) +
                 float(values['-R_PER-'])) > 100:
-            window['-ERROR-'].update('エラー:合計100%以下にしてください')
+            window['-INFO-'].update('エラー:合計100%以下にしてください')
         else:
             count = count + 10
             gacha_detail(10)
@@ -283,15 +313,15 @@ while True:
         window['-SR-'].update('★★')
         window['-R-'].update('★')
         window['-TAR_PER-'].update('0.750')
-        window['-NAME-'].update('メジロアルダン')
+        window['-NAME-'].update('アドマイヤベガ')
         window['-SSR_PER-'].update('3')
         window['-SR_PER-'].update('18')
         window['-R_PER-'].update('79')
-        window['-ERROR-'].update('')
+        window['-INFO-'].update('')
 
     # frame2 button
     if event == '-LOG_CLEAR-':
-        window['-ERROR-'].update('')
+        window['-INFO-'].update('')
         window['-GET_TARGET-'].update('')
         window['-RES_0-'].update('')
         window['-RES_1-'].update('')
